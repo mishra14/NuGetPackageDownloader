@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -32,7 +31,7 @@ namespace NugetPackageDownloader
                 {
                     parallelFetchPackages();
                     packageMap.Clear();
-                    System.Threading.Thread.Sleep(1000);
+                    Thread.Sleep(1000);
                 }
                 else
                 {
@@ -109,6 +108,7 @@ namespace NugetPackageDownloader
                     Console.WriteLine(ex.Message);
                 }
             }
+            Console.WriteLine("Done with " + count + " packages");
         }
 
         private static void downloadPackage(string packageId, Dictionary<string, PackageMetadata> packageVersions)
@@ -131,11 +131,11 @@ namespace NugetPackageDownloader
                     }
                     catch (WebException wex)
                     {
-                        Console.WriteLine(string.Concat("Exception while downloading from ", urlComplete, " to ", Path.Combine(packageSavePath, packageSaveName)));
-                        Console.WriteLine(wex);
                         var errorResponse = wex.Response as HttpWebResponse;
                         if (errorResponse.StatusCode != HttpStatusCode.NotFound)
                         {
+                            Console.WriteLine(string.Concat("Exception while downloading from ", urlComplete, " to ", Path.Combine(packageSavePath, packageSaveName)));
+                            Console.WriteLine(wex);
                             logError(packageSaveName + " " + urlComplete + " " + wex.Message, Path.Combine(errorLogPath, @"error_" + Thread.CurrentThread.ManagedThreadId + ".txt"));
                         }
                     }
