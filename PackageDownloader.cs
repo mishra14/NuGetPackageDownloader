@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -85,11 +86,12 @@ namespace NugetPackageDownloader
 
         private static void parallelFetchPackages()
         {
+            long count = 0;
             // parallel fetch
             try
             {
                 Console.WriteLine("Starting downloads...");
-                var count = 0;
+
                 Parallel.ForEach(packageMap, package =>
                 {
                     count++;
@@ -102,7 +104,6 @@ namespace NugetPackageDownloader
             }
             catch (AggregateException ae)
             {
-                // This is where you can choose which exceptions to handle.
                 foreach (var ex in ae.InnerExceptions)
                 {
                     Console.WriteLine(ex.Message);
@@ -126,7 +127,7 @@ namespace NugetPackageDownloader
                     {
                         Console.Write(".");
                         var webClient = new WebClient();
-                        webClient.DownloadFileAsync(new Uri(urlComplete), Path.Combine(packageSavePath, packageSaveName));
+                        webClient.DownloadFile(new Uri(urlComplete), Path.Combine(packageSavePath, packageSaveName));
                     }
                     catch (WebException wex)
                     {
@@ -137,6 +138,11 @@ namespace NugetPackageDownloader
                         {
                             logError(packageSaveName + " " + urlComplete + " " + wex.Message, Path.Combine(errorLogPath, @"error_" + Thread.CurrentThread.ManagedThreadId + ".txt"));
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(string.Concat("Exception while downloading from ", urlComplete, " to ", Path.Combine(packageSavePath, packageSaveName)));
+                        Console.WriteLine(ex);
                     }
                 }
             }
