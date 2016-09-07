@@ -21,9 +21,9 @@ namespace NugetPackageDownloader
         {
             packageMap = new Dictionary<string, Dictionary<string, PackageMetadata>>();
             packageSavePath = @"F:\MirrorPackages";
-            logSavePath = @"F:\PackageLogs_5";
-            processedLogSavePath = @"F:\PackageLogsProcessed_5";
-            errorLogPath = @"F:\ErrorLogs_5";
+            logSavePath = @"F:\PackageLogs";
+            processedLogSavePath = @"F:\PackageLogsProcessed";
+            errorLogPath = @"F:\ErrorLogs";
             packageUrlPrefix = @"https://api.nuget.org/v3-flatcontainer/";
             while (true)
             {
@@ -105,6 +105,7 @@ namespace NugetPackageDownloader
             {
                 foreach (var ex in ae.InnerExceptions)
                 {
+                    Console.WriteLine(ex);
                     Console.WriteLine(ex.Message);
                 }
             }
@@ -126,8 +127,10 @@ namespace NugetPackageDownloader
                     try
                     {
                         Console.Write(".");
-                        var webClient = new WebClient();
-                        webClient.DownloadFile(new Uri(urlComplete), Path.Combine(packageSavePath, packageSaveName));
+                        using (var webClient = new WebClient())
+                        {
+                            webClient.DownloadFile(new Uri(urlComplete), Path.Combine(packageSavePath, packageSaveName));
+                        }
                     }
                     catch (WebException wex)
                     {
